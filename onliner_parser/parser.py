@@ -79,7 +79,7 @@ class CatalogParser:
             if json_response.status_code == 200:
                 base_price_history_json_response = BasePriceHistoryJSONResponse().parse_raw(json_response.text)
                 return base_price_history_json_response.get_items()
-            self.__random_wait(1, 4)
+            self.__random_wait(1, 3)
 
     def __get_item_spec(self, url: str) -> dict:
         while True:
@@ -103,7 +103,7 @@ class CatalogParser:
                             pass
                     specs.update({title: info})
                 return specs
-            self.__random_wait(1, 4)
+            self.__random_wait(1, 2)
 
     def __deep_parse_item(self, item: Product) -> None:
         item.price_history = self.__get_price_history(item.key)
