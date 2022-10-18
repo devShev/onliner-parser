@@ -138,5 +138,5 @@ GitHub.sublime-settings
 
 # Custom
 .idea/
-data.csv
+data/
 main.py
