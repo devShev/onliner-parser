@@ -64,6 +64,12 @@ class SaveManager:
     def set_directory_name(self, name: str) -> None:
         self.__directory_name = name
 
+    def save(self, filename: str = 'products', save_format: str = 'csv'):
+        if save_format in SaveManager.excel_formats:
+            self.save_xlsx(filename)
+        else:
+            self.save_csv(filename)
+
     def save_xlsx(self, filename: str = 'products') -> None:
         if self.__data:
             self.__create_directory()

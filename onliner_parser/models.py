@@ -7,7 +7,6 @@ from onliner_parser.save_manager import SavingObject
 
 class BasePrice(BaseModel):
     amount: Optional[float] = None
-    currency: Optional[str] = None
 
 
 class MinPricesMedian(BasePrice):
@@ -51,32 +50,45 @@ class Page(BaseModel):
     last: Optional[int] = None
 
 
-class Product(SavingObject, BaseModel):
+class PriceHistoryLog(BaseModel):
+    date: Optional[str] = None
+    price: Optional[float] = None
+
+
+class CharData(BaseModel):
+    items: list[PriceHistoryLog]
+
+    def get_items_tuple(self) -> tuple[tuple[str | None, float | None]]:
+        items = []
+        for item in self.items:
+            data = item.date
+            price = item.price
+            items.append((data, price))
+
+        return tuple(items)
+
+
+class Product(BaseModel, SavingObject):
     id: Optional[int] = None
     key: Optional[str] = None
-    name: Optional[str] = None
     full_name: Optional[str] = None
     name_prefix: Optional[str] = None
-    extended_name: Optional[str] = None
     status: Optional[str] = None
     description: Optional[str] = None
-    micro_description: Optional[str] = None
     html_url: Optional[str] = None
     reviews: Optional[ProductReviews] = None
     prices: Optional[Prices] = None
     sale: Optional[Sale] = None
 
+    price_history: Optional[tuple[tuple[str | None, float | None]]] = None
+    item_spec: Optional[dict] = None
+
     def to_dict(self) -> dict:
         dict_attrs = {
             'id': self.id,
-            'key': self.key,
-            'name': self.name,
             'full_name': self.full_name,
             'name_prefix': self.name_prefix,
-            'extended_name': self.extended_name,
-            'status': self.status,
             'description': self.description,
-            'micro_description': self.micro_description,
             'html_url': self.html_url,
             'reviews_rating': self.reviews.rating,
             'reviews_html_url': self.reviews.html_url,
@@ -84,16 +96,15 @@ class Product(SavingObject, BaseModel):
             'sale_is_on_sale': self.sale.is_on_sale,
             'sale_discount': self.sale.discount,
             'sale_min_prices_median_amount': self.sale.min_prices_median.amount,
-            'sale_min_prices_median_currency': self.sale.min_prices_median.currency,
+            'item_spec': self.item_spec,
         }
         if self.prices:
             dict_attrs.update(
                 {
                     'prices_price_min_amount': self.prices.price_min.amount,
-                    'prices_price_min_currency': self.prices.price_min.currency,
                     'prices_price_max_amount': self.prices.price_max.amount,
-                    'prices_price_max_currency': self.prices.price_max.currency,
                     'prices_offers_count': self.prices.offers.count,
+                    'price_history': self.price_history,
                 }
             )
 
@@ -103,27 +114,21 @@ class Product(SavingObject, BaseModel):
     def get_fields():
         return (
             'id',
-            'key',
-            'name',
             'full_name',
             'name_prefix',
-            'extended_name',
-            'status',
             'description',
-            'micro_description',
             'html_url',
             'reviews_rating',
             'reviews_html_url',
             'reviews_count',
             'prices_price_min_amount',
-            'prices_price_min_currency',
             'prices_price_max_amount',
-            'prices_price_max_currency',
             'prices_offers_count',
             'sale_is_on_sale',
             'sale_discount',
             'sale_min_prices_median_amount',
-            'sale_min_prices_median_currency',
+            'price_history',
+            'item_spec',
         )
 
 
@@ -134,7 +139,17 @@ class BaseJSONResponse(BaseModel):
     total_ungrouped: int
 
     def get_products(self) -> list[Product]:
-        return self.products
+        return [
+            product for product in self.products
+            if product.status == 'active'
+        ]
 
     def get_last_page(self) -> int:
         return self.page.last
+
+
+class BasePriceHistoryJSONResponse(BaseModel):
+    chart_data: Optional[CharData] = None
+
+    def get_items(self) -> tuple[tuple[str | None, float | None]]:
+        return self.chart_data.get_items_tuple()
