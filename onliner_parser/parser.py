@@ -1,4 +1,3 @@
-from time import sleep
 from random import uniform
 import time
 
@@ -42,7 +41,7 @@ class CatalogParser:
     def __random_wait(start: float = 0.1, finish: float = 0.3) -> None:
         """Random waiting in the specified range"""
         sec = uniform(start, finish)
-        sleep(sec)
+        time.sleep(sec)
 
     def __get_json_response(self) -> str:
         """Get response from API"""
@@ -111,7 +110,7 @@ class CatalogParser:
         item.item_spec = self.__get_item_spec(item.html_url)
 
     def __parse(self) -> None:
-        """Start parsing"""
+        """Parsing process"""
         start = time.time()
 
         self.__set_base_json_response(self.__get_json_response())
@@ -136,7 +135,7 @@ class CatalogParser:
         print(f'{Font.INFO} Парсинг завершён! Время выполнения {executing_time} сек. {Font.NORMAL}')
 
     def __deep_parse(self) -> None:
-        """Start deep parsing"""
+        """Deep parsing process"""
         if not self.__data:
             self.__parse()
 
@@ -164,7 +163,7 @@ class CatalogParser:
         return self.__deep_parse()
 
     def get_data(self) -> list[Product]:
-        """Returns the received data"""
+        """Returns the parsed data"""
         if self.__data:
             return self.__data
         print(f'{Font.WARN} Нечего возвращать')
