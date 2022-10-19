@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 requirements = [
     "pydantic",
@@ -11,7 +11,7 @@ requirements = [
 
 setup(
     name='onliner_parser',
-    version='0.2.1.1',
+    version='0.2.1.2',
     description='Парсер для каталога Onliner.by',
     packages=find_packages(),
     install_requires=requirements,
