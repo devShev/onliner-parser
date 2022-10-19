@@ -2,11 +2,9 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from onliner_parser.save_manager import SavingObject
-
 
 class BasePrice(BaseModel):
-    amount: Optional[float] = None
+    amount: float = None
 
 
 class MinPricesMedian(BasePrice):
@@ -22,32 +20,32 @@ class PriceMax(BasePrice):
 
 
 class Sale(BaseModel):
-    is_on_sale: Optional[bool] = None
-    discount: Optional[int] = None
-    min_prices_median: Optional[MinPricesMedian] = None
+    is_on_sale: bool = None
+    discount: int = None
+    min_prices_median: MinPricesMedian = None
 
 
 class Offers(BaseModel):
-    count: Optional[int] = None
+    count: int = None
 
 
 class Prices(BaseModel):
-    price_min: Optional[PriceMin] = None
-    price_max: Optional[PriceMax] = None
-    offers: Optional[Offers] = None
+    price_min: PriceMin = None
+    price_max: PriceMax = None
+    offers: Offers = None
 
 
 class ProductReviews(BaseModel):
-    rating: Optional[int] = None
-    count: Optional[int] = None
-    html_url: Optional[str] = None
+    rating: int = None
+    count: int = None
+    html_url: str = None
 
 
 class Page(BaseModel):
-    limit: Optional[int] = None
-    items: Optional[int] = None
-    current: Optional[int] = None
-    last: Optional[int] = None
+    limit: int = None
+    items: int = None
+    current: int = None
+    last: int = None
 
 
 class PriceHistoryLog(BaseModel):
@@ -58,34 +56,35 @@ class PriceHistoryLog(BaseModel):
 class CharData(BaseModel):
     items: list[PriceHistoryLog]
 
-    def get_items_tuple(self) -> tuple[tuple[str | None, float | None]]:
+    def get_items_tuple(self) -> str:
         items = []
         for item in self.items:
             data = item.date
             price = item.price
             items.append((data, price))
 
-        return tuple(items)
+        return str(tuple(items))
 
 
-class Product(BaseModel, SavingObject):
-    id: Optional[int] = None
-    key: Optional[str] = None
-    full_name: Optional[str] = None
-    name_prefix: Optional[str] = None
-    status: Optional[str] = None
-    description: Optional[str] = None
-    html_url: Optional[str] = None
-    reviews: Optional[ProductReviews] = None
-    prices: Optional[Prices] = None
-    sale: Optional[Sale] = None
+class Product(BaseModel):
+    id: int = None
+    key: str = None
+    full_name: str = None
+    name_prefix: str = None
+    status: str = None
+    description: str = None
+    html_url: str = None
+    reviews: ProductReviews = None
+    prices: Prices = None
+    sale: Sale = None
 
-    price_history: Optional[tuple[tuple[str | None, float | None]]] = None
-    item_spec: Optional[dict] = None
+    price_history: str = None
+    item_spec: str = None
 
     def to_dict(self) -> dict:
         dict_attrs = {
             'id': self.id,
+            'key': self.key,
             'full_name': self.full_name,
             'name_prefix': self.name_prefix,
             'description': self.description,
@@ -114,6 +113,7 @@ class Product(BaseModel, SavingObject):
     def get_fields():
         return (
             'id',
+            'key',
             'full_name',
             'name_prefix',
             'description',
@@ -135,7 +135,7 @@ class Product(BaseModel, SavingObject):
 class BaseJSONResponse(BaseModel):
     products: list[Product]
     total: int
-    page: Optional[Page]
+    page: Page
     total_ungrouped: int
 
     def get_products(self) -> list[Product]:
@@ -149,7 +149,7 @@ class BaseJSONResponse(BaseModel):
 
 
 class BasePriceHistoryJSONResponse(BaseModel):
-    chart_data: Optional[CharData] = None
+    chart_data: CharData = None
 
-    def get_items(self) -> tuple[tuple[str | None, float | None]]:
+    def get_items(self) -> str:
         return self.chart_data.get_items_tuple()

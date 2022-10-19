@@ -1,9 +1,8 @@
-from onliner_parser import Product, CatalogParser, SaveManager
+from onliner_parser import CatalogParser
+from onliner_parser.managers import SaveManager
 
-
-parser = CatalogParser('https://catalog.onliner.by/mobile')
+parser = CatalogParser('https://catalog.onliner.by/selfiestick')
 parser.deep_parse()
 
-manager = SaveManager(Product, parser.get_data())
-
-manager.save_csv()
+saver = SaveManager(parser.get_data())
+saver.save_csv()
