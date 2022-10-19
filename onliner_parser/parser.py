@@ -1,12 +1,13 @@
-from random import uniform
 import time
+from random import uniform
 
 import bs4
-from requests import Session
 from progress.bar import IncrementalBar
+from requests import Session
 
-from onliner_parser.models import BaseJSONResponse, Product, BasePriceHistoryJSONResponse
-from onliner_parser.terminal_font_style import Font
+from onliner_parser.models import (BaseJSONResponse,
+                                   BasePriceHistoryJSONResponse, Product)
+from onliner_parser.utils import Font
 
 
 class CatalogParser:
@@ -31,7 +32,7 @@ class CatalogParser:
     __last_page: int
 
     def __init__(self, url: str) -> None:
-        category = url.split('/')[-1]
+        category = url.split('/')[-1] + '?group=1'
         self.__url += category
 
     def __del__(self) -> None:
@@ -72,7 +73,7 @@ class CatalogParser:
             return True
         return False
 
-    def __get_price_history(self, key: str) -> tuple[tuple[str | None, float | None]]:
+    def __get_price_history(self, key: str) -> str:
         url = f'https://catalog.api.onliner.by/products/{key}/prices-history?period=6m'
         while True:
             json_response = self.__session.get(url)
@@ -81,7 +82,7 @@ class CatalogParser:
                 return base_price_history_json_response.get_items()
             self.__random_wait(1, 3)
 
-    def __get_item_spec(self, url: str) -> dict:
+    def __get_item_spec(self, url: str) -> str:
         while True:
             response = self.__session.get(url)
             if response.status_code == 200:
@@ -95,14 +96,14 @@ class CatalogParser:
                     info = dict()
                     for tr in tr_list[1:]:
                         try:
-                            names = [tag.text.strip() for tag in tr.select('td') if tag.text]
-                            descs = [tag.text.strip() for tag in tr.select('td span[class="value__text"]')]
+                            names = [" ".join(tag.text.split()) for tag in tr.select('td') if tag.text]
+                            descs = [" ".join(tag.text.split()) for tag in tr.select('td span[class="value__text"]')]
                             dict_ = dict(zip(names, descs))
                             info.update(dict_)
                         except IndexError:
                             pass
                     specs.update({title: info})
-                return specs
+                return str(specs)
             self.__random_wait(1, 2)
 
     def __deep_parse_item(self, item: Product) -> None:
@@ -166,4 +167,11 @@ class CatalogParser:
         """Returns the parsed data"""
         if self.__data:
             return self.__data
-        print(f'{Font.WARN} Нечего возвращать')
+        print(f'{Font.ERROR} Нечего возвращать')
+
+    def insert_data(self, data: list[Product]) -> None:
+        """Insert data into parser"""
+        if not self.__data:
+            self.__data = data
+        else:
+            print(f'{Font.ERROR} В парсере уже есть данные')

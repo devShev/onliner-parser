@@ -1,41 +1,15 @@
 import csv
 import os
-from abc import ABC, abstractmethod
 
 import pandas as pd
 
-from onliner_parser.terminal_font_style import Font
-
-
-class SavingObject(ABC):
-    @abstractmethod
-    def to_dict(self) -> dict:
-        """Преобразование объекта в словарь без вложенности"""
-
-    @staticmethod
-    @abstractmethod
-    def get_fields() -> tuple:
-        """Вернуть названия полей"""
-
-
-class NotSavingObject(Exception):
-    def __init__(self, *args):
-        if args:
-            self.message = args[0]
-        else:
-            self.message = None
-
-    def __str__(self):
-        if self.message:
-            return f'NotSavingObject, {self.message}'
-        else:
-            return f'NotSavingObject raised!'
+from onliner_parser.models import Product
+from onliner_parser.utils import Font
 
 
 class SaveManager:
-    __data: list
+    __data: list[Product]
     __directory_name: str = 'data/'
-    __class: type[SavingObject]
 
     excel_formats: tuple = (
             'xlsx',
@@ -50,11 +24,7 @@ class SaveManager:
             'excel',
         )
 
-    def __init__(self, cls: type[SavingObject], data: list) -> None:
-        if issubclass(cls, SavingObject):
-            self.__class = cls
-        else:
-            raise NotSavingObject('Передаваемый класс не наследует SavingObject')
+    def __init__(self, data: list) -> None:
         self.__data = data
 
     def __create_directory(self):
@@ -98,7 +68,7 @@ class SaveManager:
 
             try:
                 with open(filepath, mode='w', encoding='utf-8') as file:
-                    fields = self.__class.get_fields()
+                    fields = Product.get_fields()
 
                     writer = csv.DictWriter(
                         file,

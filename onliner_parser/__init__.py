@@ -1,3 +1,2 @@
-from .parser import CatalogParser
-from .save_manager import SaveManager
-from .models import Product
+from onliner_parser.models import Product
+from onliner_parser.parser import CatalogParser
