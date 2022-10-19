@@ -4,6 +4,7 @@ from random import uniform
 import bs4
 from progress.bar import IncrementalBar
 from requests import Session
+from requests.exceptions import ConnectionError
 
 from onliner_parser.models import (BaseJSONResponse,
                                    BasePriceHistoryJSONResponse, Product)
@@ -76,7 +77,12 @@ class CatalogParser:
     def __get_price_history(self, key: str) -> str:
         url = f'https://catalog.api.onliner.by/products/{key}/prices-history?period=6m'
         while True:
-            json_response = self.__session.get(url)
+            try:
+                json_response = self.__session.get(url)
+            except ConnectionError:
+                self.__random_wait(1, 1.5)
+                continue
+
             if json_response.status_code == 200:
                 base_price_history_json_response = BasePriceHistoryJSONResponse().parse_raw(json_response.text)
                 return base_price_history_json_response.get_items()
@@ -84,7 +90,12 @@ class CatalogParser:
 
     def __get_item_spec(self, url: str) -> str:
         while True:
-            response = self.__session.get(url)
+            try:
+                response = self.__session.get(url)
+            except ConnectionError:
+                self.__random_wait(1, 1.3)
+                continue
+
             if response.status_code == 200:
                 soup = bs4.BeautifulSoup(response.text, 'html.parser')
                 [bad_div.decompose() for bad_div in soup.find_all('div', class_='product-tip-wrapper')]
