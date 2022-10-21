@@ -25,10 +25,7 @@ class SaveManager:
         )
 
     def __init__(self, data: list[Product]) -> None:
-        if data == list[Product]:
-            self.__data = data
-        else:
-            raise TypeError('Not supported type in list')
+        self.__data = data
 
     def __create_directory(self):
         if not os.path.exists(f'{self.__directory_name}'):
