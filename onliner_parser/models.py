@@ -53,17 +53,17 @@ class PriceHistoryLog(BaseModel):
     price: Optional[float] = None
 
 
-class CharData(BaseModel):
+class ChartData(BaseModel):
     items: list[PriceHistoryLog]
 
-    def get_items_tuple(self) -> str:
+    def get_items_tuple(self) -> tuple:
         items = []
         for item in self.items:
             data = item.date
             price = item.price
             items.append((data, price))
 
-        return str(tuple(items))
+        return tuple(items)
 
 
 class Product(BaseModel):
@@ -78,8 +78,8 @@ class Product(BaseModel):
     prices: Prices = None
     sale: Sale = None
 
-    price_history: str = None
-    item_spec: str = None
+    price_history: tuple = None
+    item_spec: dict = None
 
     def to_dict(self) -> dict:
         dict_attrs = {
@@ -149,7 +149,7 @@ class BaseJSONResponse(BaseModel):
 
 
 class BasePriceHistoryJSONResponse(BaseModel):
-    chart_data: CharData = None
+    chart_data: ChartData = None
 
-    def get_items(self) -> str:
+    def get_items(self) -> tuple:
         return self.chart_data.get_items_tuple()

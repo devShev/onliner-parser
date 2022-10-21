@@ -4,6 +4,9 @@ from onliner_parser.models import (MinPricesMedian, Offers, PriceMax, PriceMin,
                                    Prices, Product, ProductReviews, Sale)
 
 
+# DO NOT SUPPORTED AT THIS TIME!!! DON'T USE THIS MANAGER!!!
+
+
 class LoadManager:
     __data: list[Product] = []
     __directory_name: str = 'data/'

@@ -74,7 +74,7 @@ class CatalogParser:
             return True
         return False
 
-    def __get_price_history(self, key: str) -> str:
+    def __get_price_history(self, key: str) -> tuple:
         url = f'https://catalog.api.onliner.by/products/{key}/prices-history?period=6m'
         while True:
             try:
@@ -88,7 +88,7 @@ class CatalogParser:
                 return base_price_history_json_response.get_items()
             self.__random_wait(1, 3)
 
-    def __get_item_spec(self, url: str) -> str:
+    def __get_item_spec(self, url: str) -> dict:
         while True:
             try:
                 response = self.__session.get(url)
@@ -114,7 +114,7 @@ class CatalogParser:
                         except IndexError:
                             pass
                     specs.update({title: info})
-                return str(specs)
+                return specs
             self.__random_wait(1, 2)
 
     def __deep_parse_item(self, item: Product) -> None:
@@ -126,7 +126,8 @@ class CatalogParser:
         start = time.time()
 
         self.__set_base_json_response(self.__get_json_response())
-        self.__set_last_page(self.__base_json_response.get_last_page())
+        self.__set_last_page(1)
+        # self.__set_last_page(self.__base_json_response.get_last_page())
 
         print(f'{Font.INFO} Начало парсинга...')
 

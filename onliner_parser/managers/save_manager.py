@@ -24,8 +24,11 @@ class SaveManager:
             'excel',
         )
 
-    def __init__(self, data: list) -> None:
-        self.__data = data
+    def __init__(self, data: list[Product]) -> None:
+        if data == list[Product]:
+            self.__data = data
+        else:
+            raise TypeError('Not supported type in list')
 
     def __create_directory(self):
         if not os.path.exists(f'{self.__directory_name}'):
