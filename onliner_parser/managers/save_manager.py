@@ -1,10 +1,9 @@
-import csv
 import os
-
 import pandas as pd
 
 from onliner_parser.models import Product
 from onliner_parser.utils import Font
+from onliner_parser.utils import DataTransformer
 
 
 class SaveManager:
@@ -12,17 +11,17 @@ class SaveManager:
     __directory_name: str = 'data/'
 
     excel_formats: tuple = (
-            'xlsx',
-            'xlsm',
-            'xlsb',
-            'xlam',
-            'xltx',
-            'xltm',
-            'xls',
-            'xla',
-            'xlt',
-            'excel',
-        )
+        'xlsx',
+        'xlsm',
+        'xlsb',
+        'xlam',
+        'xltx',
+        'xltm',
+        'xls',
+        'xla',
+        'xlt',
+        'excel',
+    )
 
     def __init__(self, data: list[Product]) -> None:
         self.__data = data
@@ -34,58 +33,28 @@ class SaveManager:
     def set_directory_name(self, name: str) -> None:
         self.__directory_name = name
 
-    def save(self, filename: str = 'products', save_format: str = 'csv'):
-        if save_format in SaveManager.excel_formats:
-            self.save_xlsx(filename)
-        else:
-            self.save_csv(filename)
-
-    def save_xlsx(self, filename: str = 'products') -> None:
+    def save(self, filename: str = 'products', save_format: str = 'csv') -> None:
         if self.__data:
             self.__create_directory()
-            data = [product.to_dict() for product in self.__data]
 
-            df = pd.DataFrame(data)
+            list_of_prods = [product.to_dict() for product in self.__data]
+            df = pd.DataFrame(list_of_prods)
 
-            filepath = f'{self.__directory_name}{filename}.xlsx'
+            data_transformer = DataTransformer()
+            df = data_transformer.transform_dp_fields(df, self.__data)
+
+            filepath = f'{self.__directory_name}{filename}.{save_format}'
             try:
-                df.to_excel(filepath, sheet_name='Products', na_rep='-')
-
+                if save_format == 'csv':
+                    df.to_csv(filepath)
+                else:
+                    df.to_excel(filepath, sheet_name='Products', na_rep='-')
             except BaseException as e:
-                print(f'{Font.WARN} Ошибка записи{Font.NORMAL}')
+                print(f'{Font.WARN} Recording error{Font.NORMAL}')
                 print(f'{Font.ERROR} {e}')
 
             else:
-                print(f'{Font.INFO} Данные сохранены в {filename}.xlsx{Font.NORMAL}')
+                print(f'{Font.INFO} Data saved to {filename}.{save_format}{Font.NORMAL}')
 
         else:
-            print(f'{Font.WARN} Нечего сохранять{Font.NORMAL}')
-
-    def save_csv(self, filename: str = 'products') -> None:
-        if self.__data:
-            self.__create_directory()
-            filepath = f'{self.__directory_name}{filename}.csv'
-
-            try:
-                with open(filepath, mode='w', encoding='utf-8') as file:
-                    fields = Product.get_fields()
-
-                    writer = csv.DictWriter(
-                        file,
-                        delimiter=',',
-                        lineterminator="\r",
-                        fieldnames=fields,
-                    )
-
-                    writer.writeheader()
-                    for product in self.__data:
-                        writer.writerow(product.to_dict())
-
-            except BaseException as e:
-                print(f'{Font.WARN} Ошибка записи{Font.NORMAL}')
-                print(f'{Font.ERROR} {e}')
-            else:
-                print(f'{Font.INFO} Данные сохранены в {filename}.csv{Font.NORMAL}')
-
-        else:
-            print(f'{Font.WARN} Нечего сохранять{Font.NORMAL}')
+            print(f'{Font.WARN} There is nothing to save{Font.NORMAL}')

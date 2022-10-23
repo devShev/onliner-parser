@@ -14,4 +14,4 @@ bar.next()
 
 
 saver = SaveManager(parser.get_data())
-saver.save_csv()
+saver.save()
