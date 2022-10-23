@@ -117,13 +117,10 @@ class CatalogParser:
             title = tr_list[0].text.strip()
             info = dict()
             for tr in tr_list[1:]:
-                try:
-                    names = [" ".join(tag.text.split()) for tag in tr.select('td') if tag.text]
-                    descs = [" ".join(tag.text.split()) for tag in tr.select('td span[class="value__text"]')]
-                    dict_ = dict(zip(names, descs))
-                    info.update(dict_)
-                except IndexError:
-                    pass
+                names = [" ".join(tag.text.split()) for tag in tr.select('td') if tag.text]
+                descs = [" ".join(tag.text.split()) for tag in tr.select('td span[class="value__text"]')]
+                dict_ = dict(zip(names, descs))
+                info.update(dict_)
             specs.update({title: info})
         return specs
 
@@ -138,8 +135,7 @@ class CatalogParser:
         response: Response = self.__get_response()
 
         self.__set_base_json_response(response.text)
-        self.__set_last_page(1)
-        # self.__set_last_page(self.__base_json_response.get_last_page())
+        self.__set_last_page(self.__base_json_response.get_last_page())
 
         print(f'{Font.INFO} Начало парсинга...')
 
