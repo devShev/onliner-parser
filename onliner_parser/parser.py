@@ -153,8 +153,8 @@ class CatalogParser:
 
         print()  # Empty line for normal output
         finish = time.time()
-        executing_time = round(finish - start, 2)
-        print(f'{Font.INFO} Parsing completed! Execution time {executing_time} sec. {Font.NORMAL}')
+        executing_time = time.strftime("%H:%M:%S", time.gmtime(round(finish - start, 2)))
+        print(f'{Font.INFO} Parsing completed! Execution time: {executing_time}{Font.NORMAL}')
 
         self.__items_count = len(self.__data)
 
@@ -185,8 +185,8 @@ class CatalogParser:
         print()  # Empty line for normal output
 
         finish = time.time()
-        executing_time = round(finish - start, 2)
-        print(f'{Font.INFO} Deep parsing completed! Execution time  {executing_time} sec. {Font.NORMAL}')
+        executing_time = time.strftime("%H:%M:%S", time.gmtime(round(finish - start, 2)))
+        print(f'{Font.INFO} Deep parsing completed! Execution time: {executing_time}{Font.NORMAL}')
 
     def parse(self) -> None:
         """Start parsing"""
