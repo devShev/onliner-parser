@@ -30,7 +30,10 @@ class CatalogParser:
 
     __base_json_response: BaseJSONResponse
     __data: list[Product] = []
+
     __last_page: int
+    __items_count: int
+    __current_item_index: int = 0
 
     def __init__(self, url: str) -> None:
         category = url.split('/')[-1] + '?group=1'
@@ -67,10 +70,17 @@ class CatalogParser:
         """Adding new data to memory"""
         self.__data.extend(data)
 
-    def __increment_current_page(self) -> bool:
+    def __inc_current_page(self) -> bool:
         """Increasing the current parsing page until it is equal to the last page"""
         self.__params['page'] = self.__params.get("page") + 1
         if self.__params['page'] <= self.__last_page:
+            return True
+        return False
+
+    def __inc_current_item_index(self) -> bool:
+        """Increasing current item index until it is equal items count"""
+        if self.__current_item_index < self.get_items_count() - 1:  # -1 because list start from 0
+            self.__current_item_index += 1
             return True
         return False
 
@@ -136,7 +146,7 @@ class CatalogParser:
         bar = IncrementalBar(f'{Font.YELLOW}Процесс парсинга:{Font.NORMAL}', max=self.__last_page)
         bar.next()
 
-        while self.__increment_current_page():
+        while self.__inc_current_page():
             self.__set_base_json_response(self.__get_json_response())
             self.__extend_data(self.__base_json_response.get_products())
             bar.next()
@@ -146,6 +156,18 @@ class CatalogParser:
         finish = time.time()
         executing_time = round(finish - start, 2)
         print(f'{Font.INFO} Парсинг завершён! Время выполнения {executing_time} сек. {Font.NORMAL}')
+
+        self.__items_count = len(self.__data)
+
+    def __parse_next(self) -> bool:
+        """Parse next item in data"""
+        if not self.__data:
+            self.__parse()
+
+        current_index = self.__current_item_index
+        self.__deep_parse_item(self.__data[current_index])
+
+        return self.__inc_current_item_index()
 
     def __deep_parse(self) -> None:
         """Deep parsing process"""
@@ -175,6 +197,10 @@ class CatalogParser:
         """Start deep parsing"""
         return self.__deep_parse()
 
+    def parse_next(self) -> bool:
+        """Parse next item in data"""
+        return self.__parse_next()
+
     def get_data(self) -> list[Product]:
         """Returns the parsed data"""
         if self.__data:
@@ -187,3 +213,9 @@ class CatalogParser:
             self.__data = data
         else:
             print(f'{Font.ERROR} В парсере уже есть данные')
+
+    def get_items_count(self) -> int:
+        """Return count of items"""
+        if self.__items_count:
+            return self.__items_count
+        print(f'{Font.ERROR} Нечего возвращать')
