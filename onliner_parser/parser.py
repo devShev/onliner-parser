@@ -129,11 +129,11 @@ class CatalogParser:
         self.__set_last_page(1)
         # self.__set_last_page(self.__base_json_response.get_last_page())
 
-        print(f'{Font.INFO} Начало парсинга...')
+        print(f'{Font.INFO} Starting parsing....')
 
         self.__extend_data(self.__base_json_response.get_products())
         # Show progress
-        bar = IncrementalBar(f'{Font.YELLOW}Процесс парсинга:{Font.NORMAL}', max=self.__last_page)
+        bar = IncrementalBar(f'{Font.YELLOW}Parsing process:{Font.NORMAL}', max=self.__last_page)
         bar.next()
 
         while self.__increment_current_page():
@@ -145,7 +145,7 @@ class CatalogParser:
         print()  # Empty line for normal output
         finish = time.time()
         executing_time = round(finish - start, 2)
-        print(f'{Font.INFO} Парсинг завершён! Время выполнения {executing_time} сек. {Font.NORMAL}')
+        print(f'{Font.INFO} Parsing completed! Execution time {executing_time} sec. {Font.NORMAL}')
 
     def __deep_parse(self) -> None:
         """Deep parsing process"""
@@ -153,8 +153,8 @@ class CatalogParser:
             self.__parse()
 
         start = time.time()
-        print(f'{Font.INFO} Начало глубокого парсинга...')
-        bar = IncrementalBar(f'{Font.YELLOW}Процесс парсинга:{Font.NORMAL}', max=len(self.__data))
+        print(f'{Font.INFO} Starting deep parsing...')
+        bar = IncrementalBar(f'{Font.YELLOW}Deep parsing process:{Font.NORMAL}', max=len(self.__data))
 
         for item in self.__data:
             self.__deep_parse_item(item)
@@ -165,7 +165,7 @@ class CatalogParser:
 
         finish = time.time()
         executing_time = round(finish - start, 2)
-        print(f'{Font.INFO} Глубокий Парсинг завершён! Время выполнения {executing_time} сек. {Font.NORMAL}')
+        print(f'{Font.INFO} Deep parsing completed! Execution time  {executing_time} sec. {Font.NORMAL}')
 
     def parse(self) -> None:
         """Start parsing"""
@@ -179,11 +179,11 @@ class CatalogParser:
         """Returns the parsed data"""
         if self.__data:
             return self.__data
-        print(f'{Font.ERROR} Нечего возвращать')
+        print(f'{Font.ERROR} Nothing to return')
 
     def insert_data(self, data: list[Product]) -> None:
         """Insert data into parser"""
         if not self.__data:
             self.__data = data
         else:
-            print(f'{Font.ERROR} В парсере уже есть данные')
+            print(f'{Font.ERROR} The parser already contains data')
