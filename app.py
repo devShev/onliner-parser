@@ -7,4 +7,4 @@ parser.deep_parse()
 print(parser.get_data()[0])
 
 saver = SaveManager(parser.get_data())
-saver.save_csv()
+saver.save()
