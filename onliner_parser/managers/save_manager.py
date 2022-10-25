@@ -2,11 +2,12 @@ import os
 import pandas as pd
 
 from onliner_parser.models import Product
-from onliner_parser.utils import Font
+from onliner_parser.utils import Font, Settings
 from onliner_parser.utils import DataTransformer
 
 
 class SaveManager:
+    __settings: Settings
     __data: list[Product]
     __directory_name: str = 'data/'
 
@@ -23,8 +24,18 @@ class SaveManager:
         'excel',
     )
 
-    def __init__(self, data: list[Product]) -> None:
+    def __init__(self, data: list[Product], settings: Settings) -> None:
+        exception = ValueError('You must pass an instance of the list[Product] and Settings')
+
+        for prod in data:
+            if not isinstance(prod, Product):
+                raise exception
         self.__data = data
+
+        if isinstance(settings, Settings):
+            self.__settings = settings
+        else:
+            raise exception
 
     def __create_directory(self):
         if not os.path.exists(f'{self.__directory_name}'):

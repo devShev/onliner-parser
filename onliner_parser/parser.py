@@ -8,11 +8,12 @@ from requests.exceptions import ConnectionError
 
 from onliner_parser.models import (BaseJSONResponse,
                                    BasePriceHistoryJSONResponse, Product)
-from onliner_parser.utils import Font
+from onliner_parser.utils import Font, Settings
 
 
 class CatalogParser:
     __session: Session = Session()
+    SETTINGS: Settings = Settings()
 
     __url: str = 'https://catalog.onliner.by/sdapi/catalog.api/search/'
     __headers: dict = {
@@ -106,6 +107,7 @@ class CatalogParser:
         return base_price_history_json_response.get_items()
 
     def __get_item_spec(self, url: str) -> dict:
+        """Parse item spec by bs4"""
         response = self.__get_response(url)
 
         soup = bs4.BeautifulSoup(response.text, 'html.parser')
@@ -125,8 +127,11 @@ class CatalogParser:
         return specs
 
     def __deep_parse_item(self, item: Product) -> None:
-        item.price_history = self.__get_price_history(item.key)
-        item.item_spec = self.__get_item_spec(item.html_url)
+        """Deep parsing given item"""
+        if self.SETTINGS.parse_history:
+            item.price_history = self.__get_price_history(item.key)
+        if self.SETTINGS.parse_spec:
+            item.item_spec = self.__get_item_spec(item.html_url)
 
     def __parse(self) -> None:
         """Parsing process"""
@@ -135,7 +140,8 @@ class CatalogParser:
         response: Response = self.__get_response()
 
         self.__set_base_json_response(response.text)
-        self.__set_last_page(self.__base_json_response.get_last_page())
+        self.__set_last_page(1)
+        # self.__set_last_page(self.__base_json_response.get_last_page())
 
         print(f'{Font.INFO} Starting parsing....')
 
