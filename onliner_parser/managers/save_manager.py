@@ -57,9 +57,9 @@ class SaveManager:
             filepath = f'{self.__directory_name}{filename}.{save_format}'
             try:
                 if save_format == 'csv':
-                    df.to_csv(filepath)
+                    df.to_csv(filepath, index=False)
                 else:
-                    df.to_excel(filepath, sheet_name='Products', na_rep='-')
+                    df.to_excel(filepath, sheet_name='Products', na_rep='-', index=False)
             except BaseException as e:
                 print(f'{Font.WARN} Recording error{Font.NORMAL}')
                 print(f'{Font.ERROR} {e}')
