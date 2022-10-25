@@ -44,7 +44,7 @@ class DataTransformer:
             df with columns that descript product
 
         """
-        desc_df = pd.DataFrame()
+        spec_df = pd.DataFrame()
         for prod in products_data:
             df_ = pd.DataFrame.from_dict({j: prod.item_spec[i][j]
                                           for i in prod.item_spec.keys()
@@ -52,9 +52,9 @@ class DataTransformer:
                                          orient="index")
             df_ = df_.transpose()
             df_["id"] = prod.id
-            desc_df = pd.concat([desc_df, df_])
-        desc_df.reset_index(inplace=True)
-        return desc_df
+            spec_df = pd.concat([spec_df, df_])
+        spec_df.reset_index(inplace=True, drop=True)
+        return spec_df
 
     def transform_dp_fields(self, full_df: pd.DataFrame(), products_data: list[Product], settings) -> pd.DataFrame():
         """
@@ -69,7 +69,7 @@ class DataTransformer:
         Returns
         -------
         full_df: pd.Dataframe()
-            transfromed df
+            transformed df
 
         """
         full_df.drop(["price_history", "item_spec"], axis=1, inplace=True)
