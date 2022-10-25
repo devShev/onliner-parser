@@ -3,7 +3,7 @@ from random import uniform
 
 import bs4
 from progress.bar import IncrementalBar
-from requests import Session, Response
+from requests import Response, Session
 from requests.exceptions import ConnectionError
 
 from onliner_parser.models import (BaseJSONResponse,

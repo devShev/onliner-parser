@@ -1,11 +1,12 @@
+from progress.bar import IncrementalBar
+
 from onliner_parser import CatalogParser
 from onliner_parser.managers import SaveManager
 
-from progress.bar import IncrementalBar
-
 parser = CatalogParser('https://catalog.onliner.by/selfiestick')
 
-parser.SETTINGS.parse_spec = False
+parser.SETTINGS.parse_spec = True
+parser.SETTINGS.parse_history = True
 
 parser.parse()
 

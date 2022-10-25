@@ -1,9 +1,9 @@
 import os
+
 import pandas as pd
 
 from onliner_parser.models import Product
-from onliner_parser.utils import Font, Settings
-from onliner_parser.utils import DataTransformer
+from onliner_parser.utils import DataTransformer, Font, Settings
 
 
 class SaveManager:

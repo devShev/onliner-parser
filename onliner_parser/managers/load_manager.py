@@ -3,7 +3,6 @@ import csv
 from onliner_parser.models import (MinPricesMedian, Offers, PriceMax, PriceMin,
                                    Prices, Product, ProductReviews, Sale)
 
-
 # NOT SUPPORTED AT THIS TIME!!! DON'T USE THIS MANAGER!!!
 
 

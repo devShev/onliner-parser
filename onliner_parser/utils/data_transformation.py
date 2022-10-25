@@ -1,5 +1,5 @@
 import pandas as pd
-import time
+
 from onliner_parser.models import Product
 
 
