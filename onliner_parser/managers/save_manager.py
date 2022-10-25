@@ -52,7 +52,7 @@ class SaveManager:
             df = pd.DataFrame(list_of_prods)
 
             data_transformer = DataTransformer()
-            df = data_transformer.transform_dp_fields(df, self.__data)
+            df = data_transformer.transform_dp_fields(df, self.__data, self.__settings)
 
             filepath = f'{self.__directory_name}{filename}.{save_format}'
             try:

@@ -1,5 +1,5 @@
 import pandas as pd
-
+import time
 from onliner_parser.models import Product
 
 
@@ -31,7 +31,7 @@ class DataTransformer:
         return pd.DataFrame(p_h_data, columns=columns)
 
     @staticmethod
-    def __get_description_df(products_data: list[Product]) -> pd.DataFrame:
+    def __get_specification_df(products_data: list[Product]) -> pd.DataFrame:
         """
         Transform initial dict[str, [dict[str,str] | str]] structure to dataframe of strs
         Parameters
@@ -56,13 +56,15 @@ class DataTransformer:
         desc_df.reset_index(inplace=True)
         return desc_df
 
-    def transform_dp_fields(self, full_df: pd.DataFrame(), products_data: list[Product]) -> pd.DataFrame():
+    def transform_dp_fields(self, full_df: pd.DataFrame(), products_data: list[Product], settings) -> pd.DataFrame():
         """
         Transform deep parsed fields
         Parameters
         ----------
         full_df: pd.DataFrame()
         products_data: list[Product]
+        settings: Settings
+            class of bool vars(parse or not)
 
         Returns
         -------
@@ -70,12 +72,13 @@ class DataTransformer:
             transfromed df
 
         """
-        # transform fields from deep parsing
-        p_h_df = self.__get_price_history_df(products_data)
-        desc_df = self.__get_description_df(products_data)
-        transform_fields_df = p_h_df.merge(desc_df, on="id")
-
         full_df.drop(["price_history", "item_spec"], axis=1, inplace=True)
 
-        full_df = full_df.merge(transform_fields_df, on="id")
+        # transform fields from deep parsing
+        if settings.parse_history:
+            p_h_df = self.__get_price_history_df(products_data)
+            full_df = full_df.merge(p_h_df, on="id")
+        if settings.parse_spec:
+            spec_df = self.__get_specification_df(products_data)
+            full_df = full_df.merge(spec_df, on="id")
         return full_df
