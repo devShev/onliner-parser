@@ -1,14 +1,16 @@
+import asyncio
 import time
 from random import uniform
 
 import bs4
+from aiohttp import ClientSession
 from progress.bar import IncrementalBar
 from requests import Response, Session
 from requests.exceptions import ConnectionError
 
 from onliner_parser.models import (BaseJSONResponse,
                                    BasePriceHistoryJSONResponse, Product)
-from onliner_parser.utils import Font, Settings
+from onliner_parser.utils import Font, Settings, exec_time
 
 
 class CatalogParser:
@@ -98,19 +100,9 @@ class CatalogParser:
             return True
         return False
 
-    def __get_price_history(self, key: str) -> tuple:
-        url = f'https://catalog.api.onliner.by/products/{key}/prices-history?period=6m'
-
-        response = self.__get_response(url)
-
-        base_price_history_json_response = BasePriceHistoryJSONResponse().parse_raw(response.text)
-        return base_price_history_json_response.get_items()
-
-    def __get_item_spec(self, url: str) -> dict:
-        """Parse item spec by bs4"""
-        response = self.__get_response(url)
-
-        soup = bs4.BeautifulSoup(response.text, 'html.parser')
+    @staticmethod
+    def __bs_parse(html: str) -> dict:
+        soup = bs4.BeautifulSoup(html, 'html.parser')
         [bad_div.decompose() for bad_div in soup.find_all('div', class_='product-tip-wrapper')]
         tbodys = soup.select('table[class="product-specs__table"] tbody')
         specs = dict()
@@ -126,6 +118,20 @@ class CatalogParser:
             specs.update({title: info})
         return specs
 
+    def __get_price_history(self, key: str) -> tuple:
+        url = f'https://catalog.api.onliner.by/products/{key}/prices-history?period=6m'
+
+        response = self.__get_response(url)
+
+        base_price_history_json_response = BasePriceHistoryJSONResponse().parse_raw(response.text)
+        return base_price_history_json_response.get_items()
+
+    def __get_item_spec(self, url: str) -> dict:
+        """Parse item spec by bs4"""
+        response = self.__get_response(url)
+
+        return self.__bs_parse(response.text)
+
     def __deep_parse_item(self, item: Product) -> None:
         """Deep parsing given item"""
         if self.SETTINGS.parse_history:
@@ -133,17 +139,75 @@ class CatalogParser:
         if self.SETTINGS.parse_spec:
             item.item_spec = self.__get_item_spec(item.html_url)
 
-    def __parse(self) -> None:
-        """Parsing process"""
-        start = time.time()
+    async def __get_async_response(self, async_session: ClientSession, page: int):
+        async with async_session.get(self.__url, params={'page': page}) as response:
+            json = await response.text()
+            bjr: BaseJSONResponse = BaseJSONResponse.parse_raw(json)
+            self.__extend_data(bjr.get_products())
 
+    async def __get_future_instance(self):
+        tasks = []
+        async with ClientSession() as async_session:
+            for page in range(1, self.__last_page + 1):
+                task = asyncio.ensure_future(self.__get_async_response(async_session, page=page))
+                tasks.append(task)
+
+            await asyncio.gather(*tasks)
+
+    async def __async_deep_parse_item(self, async_session: ClientSession, item: Product):
+        if self.SETTINGS.parse_spec:
+            async with async_session.get(item.html_url) as response:
+                html = await response.text()
+                item.item_spec = self.__bs_parse(html)
+        if self.SETTINGS.parse_history:
+            url = f'https://catalog.api.onliner.by/products/{item.key}/prices-history?period=6m'
+            async with async_session.get(url) as response:
+                json = await response.text()
+                base_price_history: BasePriceHistoryJSONResponse = BasePriceHistoryJSONResponse().parse_raw(json)
+                item.price_history = base_price_history.get_items()
+
+    async def __get_future_instance_deep_parse(self):
+        tasks = []
+        async with ClientSession() as async_session:
+            for prod in self.__data:
+                task = asyncio.ensure_future(self.__async_deep_parse_item(async_session, prod))
+                tasks.append(task)
+
+            await asyncio.gather(*tasks)
+
+    @exec_time()
+    def __async_parse(self) -> None:
+        """Async parsing process"""
         response: Response = self.__get_response()
 
         self.__set_base_json_response(response.text)
-        self.__set_last_page(1)
-        # self.__set_last_page(self.__base_json_response.get_last_page())
+        self.__set_last_page(self.__base_json_response.get_last_page())
 
-        print(f'{Font.INFO} Starting parsing....')
+        self.__extend_data(self.__base_json_response.get_products())
+
+        loop = asyncio.get_event_loop()
+        future = asyncio.ensure_future(self.__get_future_instance())
+        loop.run_until_complete(future)
+
+        self.__items_count = len(self.__data)
+
+    @exec_time(start_text='Start deep parsing...', end_text='Deep parsing completed!')
+    def __async_deep_parse(self) -> None:
+        """Async deep parsing"""
+        if not self.__data:
+            self.__async_parse()
+
+        loop = asyncio.get_event_loop()
+        future = asyncio.ensure_future(self.__get_future_instance_deep_parse())
+        loop.run_until_complete(future)
+
+    @exec_time()
+    def __parse(self) -> None:
+        """Parsing process"""
+        response: Response = self.__get_response()
+
+        self.__set_base_json_response(response.text)
+        self.__set_last_page(self.__base_json_response.get_last_page())
 
         self.__extend_data(self.__base_json_response.get_products())
         # Show progress
@@ -157,11 +221,6 @@ class CatalogParser:
             bar.next()
             self.__random_wait()
 
-        print()  # Empty line for normal output
-        finish = time.time()
-        executing_time = time.strftime("%H:%M:%S", time.gmtime(round(finish - start, 2)))
-        print(f'{Font.INFO} Parsing completed! Execution time: {executing_time}{Font.NORMAL}')
-
         self.__items_count = len(self.__data)
 
     def __parse_next(self) -> bool:
@@ -174,13 +233,12 @@ class CatalogParser:
 
         return self.__inc_current_item_index()
 
+    @exec_time(start_text='Start deep parsing...', end_text='Deep parsing completed!')
     def __deep_parse(self) -> None:
         """Deep parsing process"""
         if not self.__data:
             self.__parse()
 
-        start = time.time()
-        print(f'{Font.INFO} Starting deep parsing...')
         bar = IncrementalBar(f'{Font.YELLOW}Deep parsing process:{Font.NORMAL}', max=len(self.__data))
 
         for item in self.__data:
@@ -188,19 +246,21 @@ class CatalogParser:
             bar.next()
             self.__random_wait()
 
-        print()  # Empty line for normal output
-
-        finish = time.time()
-        executing_time = time.strftime("%H:%M:%S", time.gmtime(round(finish - start, 2)))
-        print(f'{Font.INFO} Deep parsing completed! Execution time: {executing_time}{Font.NORMAL}')
-
     def parse(self) -> None:
         """Start parsing"""
         self.__parse()
 
+    def async_parse(self) -> None:
+        """Start async parsing"""
+        self.__async_parse()
+
     def deep_parse(self) -> None:
         """Start deep parsing"""
-        return self.__deep_parse()
+        self.__deep_parse()
+
+    def async_deep_parse(self) -> None:
+        """Start async deep parse"""
+        self.__async_deep_parse()
 
     def parse_next(self) -> bool:
         """Parse next item in data"""

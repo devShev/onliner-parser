@@ -4,5 +4,6 @@ progress
 pandas
 openpyxl
 beautifulsoup4
+aiohttp
 flake8
 isort
