@@ -98,6 +98,7 @@ class CatalogParser:
         if self.__current_item_index < self.get_items_count() - 1:  # -1 because list start from 0
             self.__current_item_index += 1
             return True
+        self.SETTINGS.deep_parse_status = True
         return False
 
     @staticmethod
@@ -201,6 +202,8 @@ class CatalogParser:
         future = asyncio.ensure_future(self.__get_future_instance_deep_parse())
         loop.run_until_complete(future)
 
+        self.SETTINGS.deep_parse_status = True
+
     @exec_time()
     def __parse(self) -> None:
         """Parsing process"""
@@ -245,6 +248,8 @@ class CatalogParser:
             self.__deep_parse_item(item)
             bar.next()
             self.__random_wait()
+
+        self.SETTINGS.deep_parse_status = True
 
     def parse(self) -> None:
         """Start parsing"""

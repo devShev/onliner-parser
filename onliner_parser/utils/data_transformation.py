@@ -75,10 +75,11 @@ class DataTransformer:
         full_df.drop(["price_history", "item_spec"], axis=1, inplace=True)
 
         # transform fields from deep parsing
-        if settings.parse_history:
-            p_h_df = self.__get_price_history_df(products_data)
-            full_df = full_df.merge(p_h_df, on="id")
-        if settings.parse_spec:
-            spec_df = self.__get_specification_df(products_data)
-            full_df = full_df.merge(spec_df, on="id")
+        if settings.deep_parse_status:
+            if settings.parse_history:
+                p_h_df = self.__get_price_history_df(products_data)
+                full_df = full_df.merge(p_h_df, on="id")
+            if settings.parse_spec:
+                spec_df = self.__get_specification_df(products_data)
+                full_df = full_df.merge(spec_df, on="id")
         return full_df

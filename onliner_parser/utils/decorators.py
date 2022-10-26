@@ -1,7 +1,7 @@
 import time
 from functools import wraps
 
-from onliner_parser.utils import Font
+from onliner_parser.utils.font_settings import Font
 
 
 def exec_time(start_text='Starting parsing...', end_text='Parsing completed!'):
