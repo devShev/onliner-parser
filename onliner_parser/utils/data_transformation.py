@@ -7,7 +7,7 @@ class DataTransformer:
     @staticmethod
     def __get_price_history_df(products_data: list[Product]) -> pd.DataFrame:
         """
-        Transform initial tuple[tuple[str, float]] structure to dataframe str - float
+        Transforms initial tuple[tuple[str, float]] structure to dataframe str - float
         Parameters
         ----------
         products_data: list[Product]
@@ -33,7 +33,7 @@ class DataTransformer:
     @staticmethod
     def __get_specification_df(products_data: list[Product]) -> pd.DataFrame:
         """
-        Transform initial dict[str, [dict[str,str] | str]] structure to dataframe of strs
+        Transforms initial dict[str, [dict[str,str] | str]] structure to dataframe of strs
         Parameters
         ----------
         products_data: list[Product]
@@ -58,7 +58,7 @@ class DataTransformer:
 
     def transform_dp_fields(self, full_df: pd.DataFrame(), products_data: list[Product], settings) -> pd.DataFrame():
         """
-        Transform deep parsed fields
+        Transforms deep parsed fields
         Parameters
         ----------
         full_df: pd.DataFrame()
