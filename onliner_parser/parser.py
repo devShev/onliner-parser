@@ -102,6 +102,10 @@ class CatalogParser:
         return False
 
     @staticmethod
+    def __get_price_history_link(key: str) -> str:
+        return f'https://catalog.api.onliner.by/products/{key}/prices-history?period=6m'
+
+    @staticmethod
     def __bs_parse(html: str) -> dict:
         soup = bs4.BeautifulSoup(html, 'html.parser')
         [bad_div.decompose() for bad_div in soup.find_all('div', class_='product-tip-wrapper')]
@@ -120,7 +124,7 @@ class CatalogParser:
         return specs
 
     def __get_price_history(self, key: str) -> tuple:
-        url = f'https://catalog.api.onliner.by/products/{key}/prices-history?period=6m'
+        url = self.__get_price_history_link(key)
 
         response = self.__get_response(url)
 
@@ -161,7 +165,7 @@ class CatalogParser:
                 html = await response.text()
                 item.item_spec = self.__bs_parse(html)
         if self.SETTINGS.parse_history:
-            url = f'https://catalog.api.onliner.by/products/{item.key}/prices-history?period=6m'
+            url = self.__get_price_history_link(item.key)
             async with async_session.get(url) as response:
                 json = await response.text()
                 base_price_history: BasePriceHistoryJSONResponse = BasePriceHistoryJSONResponse().parse_raw(json)
