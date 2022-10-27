@@ -1,22 +1,8 @@
-from progress.bar import IncrementalBar
-
 from onliner_parser import CatalogParser
 from onliner_parser.managers import SaveManager
 
 parser = CatalogParser('https://catalog.onliner.by/selfiestick')
-
-parser.SETTINGS.parse_spec = True
-parser.SETTINGS.parse_history = True
-
-parser.parse()
-
-bar = IncrementalBar('APP', max=parser.get_items_count())  # Код, который отправляет сообщение с прогрессом
-
-while parser.parse_next():
-    bar.next()  # Код, который будет менять сообщение с прогрессом
-bar.next()
-
-print()
+parser.deep_parse()
 
 saver = SaveManager(parser.get_data(), parser.SETTINGS)
 saver.save()
