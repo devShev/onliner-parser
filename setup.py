@@ -7,6 +7,7 @@ requirements = [
     "pandas",
     "openpyxl",
     "beautifulsoup4",
+    "aiohttp",
 ]
 
 setup(

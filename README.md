@@ -1,26 +1,26 @@
 # Onliner Parser
 
-## Возможности
-- Парсинг категорий продуктов
-- Импорт полученной информации в csv или xlsx
+## Features
+- Parsing product categories
+- Importing retrieved information into csv or xlsx
 
 ------------
 
-## Установка и настройка
-1. Клонируйте репозиторий
+## Installation and setup
+1. Clone the repository
 `git clone https://github.com/devShev/onliner-parser.git`
 
-2.  Выберите необходимую категорию в браузере
+2. Select the desired category in your browser
 
-	![](https://i.ibb.co/1qq9wtS/image.png)
+    ![](https://i.ibb.co/1qq9wtS/image.png)
 
-3. Копируем URL в адресной строке браузера
+3. Copy the URL from your browser's address bar
 
-	![](https://i.ibb.co/09Q0xmh/image.png)
+    ![](https://i.ibb.co/09Q0xmh/image.png)
 
-4.  Переходим в файл app.py и вставляем наш URL, получается следующий код
+4. Go to the app.py file and paste your URL, you get the following code
 ```python
-url = 'url'
+url = 'your url'
 
 parser = CatalogParser(url)
 parser.parse()
@@ -29,33 +29,24 @@ saver = SaveManager(Product, parser.get_data())
 saver.save()
 ```
 
-
-***Настройка завершена***
+***Setup complete***
 
 ------------
 
-## Методы парсера:
+## Parser methods:
 ### parse()
-- Собрать информамцию с каталога
+- Gather information from directory
 
 ### get_data()
-- Вернуть полученную информацию в виде списка объектов
+- Return received information in the form of a list of objects
 
-## Методы Менеджера сохранения:
+### Save manager methods:
 
 ### save(filename: str, save_format: str)
-- Сохранить полученную информацию в файл
-- filename - необязательный параметр, имя создаваемого файла (по-стандарту - products)
-- save_format - необязательный параметр, формат файла (csv / xlsx) (по-стандарту - csv)
- 
-### save_xlsx(filename: str)
-- Сохранить полученную информацию в формате xlsx (excel)
-- filename - необязательный параметр, имя создаваемого файла (по-стандарту - products)
-
-### save_csv(filename: str)
-- Сохранить полученную информацию в формате csv
-- filename - необязательный параметр, имя создаваемого файла (по-стандарту - products)
+Saves the obtained information into a file
+- filename - the name of the file to be created (optional parameter, by default - 'products')
+- save_format - the file format (csv / xlsx) (optional parameter, by default - csv)
 
 ### set_directory_name(name: str)
-- Установить название директории куда сохраняются файлы (по-стандарту - data)
-- name - обязательный параметр, название директории
+Sets the name of directory where files are saved (default - 'data/')
+- name - the directory name (required parameter)
