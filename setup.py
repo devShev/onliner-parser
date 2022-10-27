@@ -12,7 +12,7 @@ requirements = [
 
 setup(
     name='onliner_parser',
-    version='0.2.2',
+    version='0.2.2.1',
     description='Парсер для каталога Onliner.by',
     packages=find_packages(),
     install_requires=requirements,
