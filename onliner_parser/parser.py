@@ -14,8 +14,8 @@ from onliner_parser.utils import Font, Settings, exec_time
 
 
 class CatalogParser:
-    __session: Session = Session()
-    SETTINGS: Settings = Settings()
+    __session: Session
+    SETTINGS: Settings
 
     __url: str = 'https://catalog.onliner.by/sdapi/catalog.api/search/'
     __headers: dict = {
@@ -27,23 +27,33 @@ class CatalogParser:
         'accept-encoding': 'gzip, deflate, br',
         'accept': 'application/json, text/javascript, */*; q=0.01',
     }
-    __params: dict = {
-        'page': 1,
-    }
+    __params: dict
 
     __base_json_response: BaseJSONResponse
     __data: list[Product] = []
 
     __last_page: int
     __items_count: int
-    __current_item_index: int = 0
+    __current_item_index: int
 
     def __init__(self, url: str) -> None:
         category = url.split('/')[-1] + '?group=1'
         self.__url += category
 
+        self.__session = Session()
+        self.SETTINGS = Settings()
+
+        self.__default__init__()
+
     def __del__(self) -> None:
         self.__session.close()
+
+    def __default__init__(self) -> None:
+        self.__params: dict = {'page': 1}
+        self.__data: list[Product] = []
+        self.__last_page: int = 0
+        self.__items_count: int = 0
+        self.__current_item_index: int = 0
 
     @staticmethod
     def __random_wait(start: float = 0.1, finish: float = 0.3) -> None:
@@ -251,7 +261,6 @@ class CatalogParser:
         for item in self.__data:
             self.__deep_parse_item(item)
             bar.next()
-            self.__random_wait()
 
         self.SETTINGS.deep_parse_status = True
 
