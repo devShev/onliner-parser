@@ -4,13 +4,12 @@ from random import uniform
 
 import bs4
 from aiohttp import ClientSession
-from progress.bar import IncrementalBar
-from requests import Response, Session
-from requests.exceptions import ConnectionError
-
 from onliner_parser.models import (BaseJSONResponse,
                                    BasePriceHistoryJSONResponse, Product)
 from onliner_parser.utils import Font, Settings, exec_time
+from progress.bar import IncrementalBar
+from requests import Response, Session
+from requests.exceptions import ConnectionError
 
 
 class CatalogParser:

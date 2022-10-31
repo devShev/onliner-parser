@@ -1,5 +1,4 @@
 import pandas as pd
-
 from onliner_parser.models import Product
 
 
